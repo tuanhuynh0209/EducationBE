@@ -62,6 +62,17 @@ app.post('/education/login', async (req, res) => {
     }
 });
 
+// USER
+// Get all User
+app.get("/education/users", async (req, res) => {
+    try {
+        const allUser = await pool.query("SELECT * FROM users");
+        res.json(allUser.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Server error" });
+    }
+})
 // Chỉnh sửa thông tin user
 app.put("/education/addInf/:id", async (req, res) => {
     try {
@@ -100,35 +111,6 @@ app.put("/education/addInf/:id", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
-// Thêm người dùng mới
-// app.post("/education/addInf/:id", async (req, res) => {
-//     try {
-//         const id = req.params;
-//         const {
-//             ho_ten, nam_ap_dung, co_so, don_vi, vien_chuc_co_huu, chuc_danh_trinh_do,
-//             so_gio_nckh_dinh_muc, truong_hop_giam_dinh_muc, ngay_neu_thuoc_case3, dinh_muc_gio_nckh, ghi_chu
-//         } = req.body;
-//         const newUser = await pool.query(
-//             `INSERT INTO users (
-//                ho_ten, nam_ap_dung, co_so, don_vi, vien_chuc_co_huu, 
-//                 chuc_danh_trinh_do, so_gio_nckh_dinh_muc, truong_hop_giam_dinh_muc, 
-//                 ngay_neu_thuoc_case3, dinh_muc_gio_nckh, ghi_chu
-//             ) VALUES (
-//                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
-//             ) RETURNING *`,
-//             [
-//                 ho_ten, nam_ap_dung, co_so, don_vi, vien_chuc_co_huu,
-//                 chuc_danh_trinh_do, so_gio_nckh_dinh_muc, truong_hop_giam_dinh_muc, ngay_neu_thuoc_case3, dinh_muc_gio_nckh, ghi_chu, id
-//             ]
-//         );
-//         // Trả về phản hồi thành công
-//         res.json(newUser.rows[0]);
-//     } catch (err) {
-//         console.error(err.message);
-//         res.status(500).json({ error: "Có lỗi xảy ra khi thêm người dùng" });
-//     }
-// });
-
 // Xóa user
 app.delete("/education/deleteUsers/:id", async (req, res) => {
     try {
@@ -140,7 +122,6 @@ app.delete("/education/deleteUsers/:id", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
-
 // Get user:id
 app.get("/education/users/:id", async (req, res) => {
     try {
@@ -152,17 +133,8 @@ app.get("/education/users/:id", async (req, res) => {
     }
 });
 
-//Get data
-//User
-app.get("/education/users", async (req, res) => {
-    try {
-        const allUser = await pool.query("SELECT * FROM users");
-        res.json(allUser.rows);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: "Server error" });
-    }
-})
+
+//BÀI BÁO KHOA HỌC
 // get all bài báo khoa học
 app.get("/education/getAllSciArt", async (req, res) => {
     try {
@@ -172,147 +144,7 @@ app.get("/education/getAllSciArt", async (req, res) => {
         console.error(err.message);
         res.status(500).json({ error: "Server error" });
     }
-
 });
-// get all báo cáo khoa học
-app.get("/education/getAllSciRep", async (req, res) => {
-    try {
-        const getAllSciRep = await pool.query("SELECT * FROM bao_cao_khoa_hoc");
-        res.json(getAllSciRep.rows);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: "Server error" });
-    }
-});
-//get all hội nghi khoa học
-app.get("/education/getAllSciConf", async (req, res) => {
-    try {
-        const getAllSciConf = await pool.query("SELECT * FROM hoi_nghi_khoa_hoc");
-        res.json(getAllSciConf.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-});
-// get all đề tài nghiên cứu
-app.get("/education/getAllSciTpt", async (req, res) => {
-    try {
-        const getAllSciTpt = await pool.query("SELECT * FROM nghien_cuu_de_tai");
-        res.json(getAllSciTpt.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-});
-// get all sản phẩm khcn
-app.get("/education/getAllSciPro", async (req, res) => {
-    try {
-        const getAllSciPro = await pool.query("SELECT * FROM san_pham_khcn");
-        res.json(getAllSciPro.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-});
-// get all sáng kiến
-app.get("/education/getAllInit", async (req, res) => {
-    try {
-        const getAllInit = await pool.query("SELECT * FROM sang_kien");
-        res.json(getAllInit.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-});
-// get all tài liệu
-app.get("/education/getAllDou", async (req, res) => {
-    try {
-        const getAllDou = await pool.query("SELECT * FROM tai_lieu");
-        res.json(getAllDou.rows);
-    } catch (err) {
-        console.error(err);
-        res.json(500).json({ error: "Server error" });
-    }
-});
-// get all hội đồng
-app.get("/education/getAllCouncil", async (req, res) => {
-    try {
-        const getAllCouncil = await pool.query("SELECT * FROM hoi_dong");
-        res.json(getAllCouncil.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-});
-// get all record statistics
-app.get("/education/getAllStatistics", async (req, res) => {
-    try {
-        const getAllStatistics = await pool.query("SELECT * FROM thong_ke_cme");
-        res.json(getAllStatistics.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-})
-// get all đề tài nghiên cứu khoa học
-app.get("/education/getAllTopics", async (req, res) => {
-    try {
-        const getAllTopics = await pool.query("SELECT * FROM nghien_cuu_de_tai");
-        res.json(getAllTopics.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-})
-
-//thêm tài liệu
-app.post("/education/AddDoc", async (req, res) => {
-    const { msnv, hoat_dong, ten_sach, tong_so_trang, ngon_ngu, ngay_xuat_ban, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien,
-        tong_so_trang_phu_trach, ty_le_dong_gop, gio_quy_doi, tai_ban } = req.body;
-    try {
-        const addDoc = await pool.query(
-            `INSERT INTO tai_lieu (
-                msnv, hoat_dong, ten_sach, tong_so_trang, ngon_ngu, ngay_xuat_ban, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien,
-                tong_so_trang_phu_trach, ty_le_dong_gop, gio_quy_doi, tai_ban
-            ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
-            ) RETURNING *`,
-            [
-                msnv, hoat_dong, ten_sach, tong_so_trang, ngon_ngu, ngay_xuat_ban, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien,
-                tong_so_trang_phu_trach, ty_le_dong_gop, gio_quy_doi, tai_ban
-            ]
-        );
-        // Trả về phản hồi thành công
-        res.json(addDoc.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: "Có lỗi xảy ra khi thêm bài báo" });
-    }
-});
-
-//thêm hội đồng NCKH
-app.post("/education/AddSciResCou", async (req, res) => {
-    const { msnv, so_nghi_quyet, ngay, vai_tro, gio_quy_doi, ten_de_tai } = req.body;
-    try {
-        const AddSciResCou = await pool.query(
-            `INSERT INTO hoi_dong (
-                msnv, so_nghi_quyet, ngay, vai_tro, gio_quy_doi, ten_de_tai
-            ) VALUES (
-                $1, $2, $3, $4, $5, $6
-            ) RETURNING *`,
-            [
-                msnv, so_nghi_quyet, ngay, vai_tro, gio_quy_doi, ten_de_tai
-            ]
-        );
-        // Trả về phản hồi thành công
-        res.json(AddSciResCou.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: "Có lỗi xảy ra khi thêm hội đồng NCKH" });
-    }
-});
-
-//Bài báo khoa học
 //thêm bài báo KH
 app.post("/education/AddSciArt", async (req, res) => {
     const { msnv, hoat_dong, ten_bai_bao, doi, ngay, ten_tap_chi, ten_nha_xuat_ban, ngon_ngu, pham_vi_cap_do,
@@ -337,7 +169,6 @@ app.post("/education/AddSciArt", async (req, res) => {
         res.status(500).json({ error: "Có lỗi xảy ra khi thêm bài báo" });
     }
 });
-
 // Chỉnh sửa bài báo khoa học
 app.put("/education/editSciArt/:id", async (req, res) => {
     const { id } = req.params;
@@ -361,7 +192,6 @@ app.put("/education/editSciArt/:id", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 })
-
 // xóa bài báo khoa học
 app.delete("/education/deleteSciArt/:id", async (req, res) => {
     try {
@@ -373,6 +203,55 @@ app.delete("/education/deleteSciArt/:id", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+
+
+// ĐỀ TÀI NCKH
+// get all đề tài nghiên cứu khoa học
+app.get("/education/getAllTopics", async (req, res) => {
+    try {
+        const getAllTopics = await pool.query("SELECT * FROM nghien_cuu_de_tai");
+        res.json(getAllTopics.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+})
+// get đề tài nghiên cứu của user
+
+//thêm đề tài nghiên cứu
+app.post("/education/AddSciResTpt", async (req, res) => {
+    const { msnv, hoat_dong, pham_vi_cap_do, ten_de_tai, ma_so_hop_dong, ngay, gio_chuan_hoat_dong, vai_tro, 
+            so_luong_thanh_vien_vai_tro, ty_le_dong_gop, gio_quy_doi } = req.body;
+    try {
+        const addSciResTpt = await pool.query(
+            `INSERT INTO nghien_cuu_de_tai (
+                msnv, hoat_dong, pham_vi_cap_do, ten_de_tai, ma_so_hop_dong, ngay, gio_chuan_hoat_dong, vai_tro, 
+            so_luong_thanh_vien_vai_tro, ty_le_dong_gop, gio_quy_doi
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+            ) RETURNING *`,
+            [
+                msnv, hoat_dong, pham_vi_cap_do, ten_de_tai, ma_so_hop_dong, ngay, gio_chuan_hoat_dong, vai_tro, 
+                so_luong_thanh_vien_vai_tro, ty_le_dong_gop, gio_quy_doi
+            ]
+        );
+        // Trả về phản hồi thành công
+        res.json(addSciResTpt.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Có lỗi xảy ra khi thêm đề tài nghiên cứu" });
+    }
+});
+// get all đề tài nghiên cứu
+// app.get("/education/getAllSciTpt", async (req, res) => {
+//     try {
+//         const getAllSciTpt = await pool.query("SELECT * FROM nghien_cuu_de_tai");
+//         res.json(getAllSciTpt.rows);
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ error: "Server error" });
+//     }
+// });
 // xóa đề tài nghiên cứu khoa học
 app.delete("/education/deleteSciTpc/:id", async (req, res) => {
     try {
@@ -382,6 +261,41 @@ app.delete("/education/deleteSciTpc/:id", async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error" });
+    }
+});
+
+
+
+// HỘI ĐỒNG NGHIÊN CỨU KHOA HỌC
+// get all hội đồng
+app.get("/education/getAllCouncil", async (req, res) => {
+    try {
+        const getAllCouncil = await pool.query("SELECT * FROM hoi_dong");
+        res.json(getAllCouncil.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+//thêm hội đồng NCKH
+app.post("/education/AddSciResCou", async (req, res) => {
+    const { msnv, so_nghi_quyet, ngay, vai_tro, gio_quy_doi, ten_de_tai } = req.body;
+    try {
+        const addSciResCou = await pool.query(
+            `INSERT INTO hoi_dong (
+                msnv, so_quyet_dinh, ngay, vai_tro, gio_quy_doi, ten_de_tai
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6
+            ) RETURNING *`,
+            [
+                msnv, so_nghi_quyet, ngay, vai_tro, gio_quy_doi, ten_de_tai
+            ]
+        );
+        // Trả về phản hồi thành công
+        res.json(addSciResCou.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Có lỗi xảy ra khi thêm hội đồng NCKH" });
     }
 });
 // xóa hội đồng
@@ -395,6 +309,98 @@ app.delete("/education/deleteCou/:id", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+
+
+
+// SÁCH, TÀI LIỆU
+// get all tài liệu
+app.get("/education/getAllDou", async (req, res) => {
+    try {
+        const getAllDou = await pool.query("SELECT * FROM tai_lieu");
+        res.json(getAllDou.rows);
+    } catch (err) {
+        console.error(err);
+        res.json(500).json({ error: "Server error" });
+    }
+});
+//thêm tài liệu
+app.post("/education/AddDoc", async (req, res) => {
+    const { msnv, hoat_dong, ten_sach, tong_so_trang, ngon_ngu, ngay_xuat_ban, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien,
+        tong_so_trang_phu_trach, ty_le_dong_gop, gio_quy_doi, tai_ban } = req.body;
+    try {
+        const addDoc = await pool.query(
+            `INSERT INTO tai_lieu (
+                msnv, hoat_dong, ten_sach, tong_so_trang, ngon_ngu, ngay_xuat_ban, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien,
+                tong_so_trang_phu_trach, ty_le_dong_gop, gio_quy_doi, tai_ban
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+            ) RETURNING *`,
+            [
+                msnv, hoat_dong, ten_sach, tong_so_trang, ngon_ngu, ngay_xuat_ban, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien,
+                tong_so_trang_phu_trach, ty_le_dong_gop, gio_quy_doi, tai_ban
+            ]
+        );
+        // Trả về phản hồi thành công
+        res.json(addDoc.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Có lỗi xảy ra khi thêm bài báo" });
+    }
+});
+// xóa tài liệu
+app.delete("/education/deleteDoc/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deleteDoc = await pool.query("DELETE FROM tai_lieu WHERE ma_tai_lieu = $1", [id]);
+        res.json("Delete success");
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+})
+
+
+
+// BÁO CÁO KHOA HỌC
+// get all báo cáo khoa học
+app.get("/education/getAllSciRep", async (req, res) => {
+    try {
+        const getAllSciRep = await pool.query("SELECT * FROM bao_cao_khoa_hoc");
+        res.json(getAllSciRep.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+// get báo cáo khoa học của user
+
+//thêm báo cáo khoa học
+app.post("/education/AddSciRpt", async (req, res) => {
+    const { msnv, hoat_dong, ten_bai_fulltext, ten_de_tai, minh_chung, ten_hoi_nghi, don_vi_to_chuc,
+            ngay, pham_vi, giai_thuong, hinh_thuc, gio_quy_doi, tong_so_tac_gia, vai_tro, 
+            tong_so_tac_gia_vai_tro, ty_le_dong_gop, gio_quy_doi_vai_tro } = req.body;
+    try {
+        const addSciRpt = await pool.query(
+            `INSERT INTO bao_cao_khoa_hoc (
+                msnv, hoat_dong, ten_bai_fulltext, ten_de_tai, minh_chung, ten_hoi_nghi, don_vi_to_chuc,
+                ngay, pham_vi, giai_thuong, hinh_thuc, gio_quy_doi, tong_so_tac_gia, vai_tro, 
+                tong_so_tac_gia_vai_tro, ty_le_dong_gop, gio_quy_doi_vai_tro
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+            ) RETURNING *`,
+            [
+                msnv, hoat_dong, ten_bai_fulltext, ten_de_tai, minh_chung, ten_hoi_nghi, don_vi_to_chuc,
+                ngay, pham_vi, giai_thuong, hinh_thuc, gio_quy_doi, tong_so_tac_gia, vai_tro, 
+                tong_so_tac_gia_vai_tro, ty_le_dong_gop, gio_quy_doi_vai_tro
+            ]
+        );
+        // Trả về phản hồi thành công
+        res.json(addSciRpt.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Có lỗi xảy ra khi thêm báo cáo khoa học" });
+    }
+});
 // xóa báo cáo khoa học
 app.delete("/education/deleteRpt/:id", async (req, res) => {
     try {
@@ -406,12 +412,66 @@ app.delete("/education/deleteRpt/:id", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+
+
+
+// THAM DỰ HỘI NGHỊ KHOA HỌC
+//get all hội nghi khoa học
+app.get("/education/getAllSciConf", async (req, res) => {
+    try {
+        const getAllSciConf = await pool.query("SELECT * FROM hoi_nghi_khoa_hoc");
+        res.json(getAllSciConf.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+// get tham gia hội nghị của user
+
+//thêm tham gia hội nghị
+app.post("/education/AddSciCfs", async (req, res) => {
+    const { msnv, hoat_dong, ten_hoi_nghi, don_vi_to_chuc, 
+            ngay, pham_vi, thoi_luong, gio_chuan_hoat_dong, gio_quy_doi } = req.body;
+    try {
+        const AddSciCfs = await pool.query(
+            `INSERT INTO hoi_nghi_khoa_hoc (
+                msnv, hoat_dong, ten_hoi_nghi, don_vi_to_chuc, 
+                ngay, pham_vi, thoi_luong, gio_chuan_hoat_dong, gio_quy_doi
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9
+            ) RETURNING *`,
+            [
+                msnv, hoat_dong, ten_hoi_nghi, don_vi_to_chuc, 
+                ngay, pham_vi, thoi_luong, gio_chuan_hoat_dong, gio_quy_doi
+            ]
+        );
+        // Trả về phản hồi thành công
+        res.json(AddSciCfs.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Có lỗi xảy ra khi thêm tham gia hội nghị khoa học" });
+    }
+});
 // delete hội nghị khoa học
 app.delete("/education/deleteConf/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const deleteConf = await pool.query("DELETE FROM hoi_nghi_khoa_hoc WHERE ma_hoi_nghi = $1", [id]);
         res.json("Delete success");
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+
+
+// SẢN PHẨM
+// get all sản phẩm khcn
+app.get("/education/getAllSciPro", async (req, res) => {
+    try {
+        const getAllSciPro = await pool.query("SELECT * FROM san_pham_khcn");
+        res.json(getAllSciPro.rows);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error" });
@@ -428,6 +488,47 @@ app.delete("/education/deleteProd/:id", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+
+
+
+
+// SÁNG KIẾN, CẢI TIẾN
+// get all sáng kiến
+app.get("/education/getAllInit", async (req, res) => {
+    try {
+        const getAllInit = await pool.query("SELECT * FROM sang_kien");
+        res.json(getAllInit.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+// get all sáng kiến của user
+
+//thêm sáng kiến
+app.post("/education/AddInit", async (req, res) => {
+    const { msnv, hoat_dong, ten_cong_trinh, ma_so_chung_nhan, ngay, loi_ich, 
+            so_tien_loi_ich, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi } = req.body;
+    try {
+        const addInit = await pool.query(
+            `INSERT INTO sang_kien (
+                msnv, hoat_dong, ten_cong_trinh, ma_so_chung_nhan, ngay, loi_ich, 
+                so_tien_loi_ich, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+            ) RETURNING *`,
+            [
+                msnv, hoat_dong, ten_cong_trinh, ma_so_chung_nhan, ngay, loi_ich, 
+                so_tien_loi_ich, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi
+            ]
+        );
+        // Trả về phản hồi thành công
+        res.json(addInit.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Có lỗi xảy ra khi thêm sáng kiến" });
+    }
+});
 // xóa sáng kiến
 app.delete("/education/deleteInit/:id", async (req, res) => {
     try {
@@ -439,17 +540,36 @@ app.delete("/education/deleteInit/:id", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
-// xóa tài liệu
-app.delete("/education/deleteDoc/:id", async (req, res) => {
+
+
+
+
+// THỐNG KÊ
+// get all record statistics
+app.get("/education/getAllStatistics", async (req, res) => {
     try {
-        const { id } = req.params;
-        const deleteDoc = await pool.query("DELETE FROM tai_lieu WHERE ma_tai_lieu = $1", [id]);
-        res.json("Delete success");
+        const getAllStatistics = await pool.query("SELECT * FROM thong_ke_cme");
+        res.json(getAllStatistics.rows);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error" });
     }
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
