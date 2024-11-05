@@ -477,6 +477,32 @@ app.get("/education/getAllSciPro", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+// get all sản phẩm của user
+
+//thêm sản phẩm
+app.post("/education/AddSciResPro", async (req, res) => {
+    const { msnv, hoat_dong, ten_san_pham, don_vi_cap_chung_nhan, minh_chung, pham_vi, 
+            ngay, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi } = req.body;
+    try {
+        const addSciResPro = await pool.query(
+            `INSERT INTO san_pham_khcn (
+                msnv, hoat_dong, ten_san_pham, don_vi_cap_chung_nhan, minh_chung, pham_vi, 
+                ngay, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+            ) RETURNING *`,
+            [
+                msnv, hoat_dong, ten_san_pham, don_vi_cap_chung_nhan, minh_chung, pham_vi, 
+                ngay, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi
+            ]
+        );
+        // Trả về phản hồi thành công
+        res.json(addSciResPro.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Có lỗi xảy ra khi thêm sản phẩm" });
+    }
+});
 // xóa sản phẩm khcn
 app.delete("/education/deleteProd/:id", async (req, res) => {
     try {
