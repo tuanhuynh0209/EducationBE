@@ -73,6 +73,18 @@ app.get("/education/users", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 })
+// get user
+app.get("/education/user/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await pool.query("SELECT * FROM users WHERE msnv = $1", [id]);
+
+        res.json(user.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+})
 // Chỉnh sửa thông tin user
 app.put("/education/addInf/:id", async (req, res) => {
     try {
@@ -134,6 +146,7 @@ app.get("/education/users/:id", async (req, res) => {
 });
 
 
+
 //BÀI BÁO KHOA HỌC
 // get all bài báo khoa học
 app.get("/education/getAllSciArt", async (req, res) => {
@@ -145,6 +158,8 @@ app.get("/education/getAllSciArt", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+// get bài báo khoa học của user
+
 //thêm bài báo KH
 app.post("/education/AddSciArt", async (req, res) => {
     const { msnv, hoat_dong, ten_bai_bao, doi, ngay, ten_tap_chi, ten_nha_xuat_ban, ngon_ngu, pham_vi_cap_do,
@@ -220,8 +235,8 @@ app.get("/education/getAllTopics", async (req, res) => {
 
 //thêm đề tài nghiên cứu
 app.post("/education/AddSciResTpt", async (req, res) => {
-    const { msnv, hoat_dong, pham_vi_cap_do, ten_de_tai, ma_so_hop_dong, ngay, gio_chuan_hoat_dong, vai_tro, 
-            so_luong_thanh_vien_vai_tro, ty_le_dong_gop, gio_quy_doi } = req.body;
+    const { msnv, hoat_dong, pham_vi_cap_do, ten_de_tai, ma_so_hop_dong, ngay, gio_chuan_hoat_dong, vai_tro,
+        so_luong_thanh_vien_vai_tro, ty_le_dong_gop, gio_quy_doi } = req.body;
     try {
         const addSciResTpt = await pool.query(
             `INSERT INTO nghien_cuu_de_tai (
@@ -231,7 +246,7 @@ app.post("/education/AddSciResTpt", async (req, res) => {
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
             ) RETURNING *`,
             [
-                msnv, hoat_dong, pham_vi_cap_do, ten_de_tai, ma_so_hop_dong, ngay, gio_chuan_hoat_dong, vai_tro, 
+                msnv, hoat_dong, pham_vi_cap_do, ten_de_tai, ma_so_hop_dong, ngay, gio_chuan_hoat_dong, vai_tro,
                 so_luong_thanh_vien_vai_tro, ty_le_dong_gop, gio_quy_doi
             ]
         );
@@ -323,6 +338,52 @@ app.get("/education/getAllDou", async (req, res) => {
         res.json(500).json({ error: "Server error" });
     }
 });
+// get thông tin bài tài liệu
+app.get("/education/getDataDoc/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const doc = await pool.query("SELECT * FROM tai_lieu WHERE ma_tai_lieu = $1", [id]);
+        // res.json(doc.rows);
+        res.json(doc.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+})
+// get list bài tài liệu của user
+app.get("/education/getDocOfUser/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const doc = await pool.query("SELECT * FROM tai_lieu WHERE msnv = $1", [id]);
+        res.json(doc.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+})
+// chỉnh sửa tài liệu 
+app.put("/education/editDataDoc/:id", async (req, res) => {
+    const { id } = req.params;
+    const { hoat_dong, ten_sach, tong_so_trang, ngon_ngu, ngay_xuat_ban, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien,
+        tong_so_trang_phu_trach, ty_le_dong_gop, gio_quy_doi, tai_ban } = req.body;
+    try {
+        const editDataDoc = await pool.query(
+            `UPDATE tai_lieu 
+             SET hoat_dong = $1, ten_sach = $2, tong_so_trang = $3, ngon_ngu = $4, ngay_xuat_ban = $5, gio_chuan_hoat_dong = $6, 
+                 vai_tro = $7, tong_so_thanh_vien = $8, tong_so_trang_phu_trach = $9, ty_le_dong_gop = $10, gio_quy_doi = $11, tai_ban = $12
+             WHERE ma_tai_lieu = $13
+             RETURNING *`,
+            [
+                hoat_dong, ten_sach, tong_so_trang, ngon_ngu, ngay_xuat_ban, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien,
+                tong_so_trang_phu_trach, ty_le_dong_gop, gio_quy_doi, tai_ban, id
+            ]
+        );
+        res.json("Update Document success");
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Server error" });
+    }
+})
 //thêm tài liệu
 app.post("/education/AddDoc", async (req, res) => {
     const { msnv, hoat_dong, ten_sach, tong_so_trang, ngon_ngu, ngay_xuat_ban, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien,
@@ -377,8 +438,8 @@ app.get("/education/getAllSciRep", async (req, res) => {
 //thêm báo cáo khoa học
 app.post("/education/AddSciRpt", async (req, res) => {
     const { msnv, hoat_dong, ten_bai_fulltext, ten_de_tai, minh_chung, ten_hoi_nghi, don_vi_to_chuc,
-            ngay, pham_vi, giai_thuong, hinh_thuc, gio_quy_doi, tong_so_tac_gia, vai_tro, 
-            tong_so_tac_gia_vai_tro, ty_le_dong_gop, gio_quy_doi_vai_tro } = req.body;
+        ngay, pham_vi, giai_thuong, hinh_thuc, gio_quy_doi, tong_so_tac_gia, vai_tro,
+        tong_so_tac_gia_vai_tro, ty_le_dong_gop, gio_quy_doi_vai_tro } = req.body;
     try {
         const addSciRpt = await pool.query(
             `INSERT INTO bao_cao_khoa_hoc (
@@ -390,7 +451,7 @@ app.post("/education/AddSciRpt", async (req, res) => {
             ) RETURNING *`,
             [
                 msnv, hoat_dong, ten_bai_fulltext, ten_de_tai, minh_chung, ten_hoi_nghi, don_vi_to_chuc,
-                ngay, pham_vi, giai_thuong, hinh_thuc, gio_quy_doi, tong_so_tac_gia, vai_tro, 
+                ngay, pham_vi, giai_thuong, hinh_thuc, gio_quy_doi, tong_so_tac_gia, vai_tro,
                 tong_so_tac_gia_vai_tro, ty_le_dong_gop, gio_quy_doi_vai_tro
             ]
         );
@@ -430,8 +491,8 @@ app.get("/education/getAllSciConf", async (req, res) => {
 
 //thêm tham gia hội nghị
 app.post("/education/AddSciCfs", async (req, res) => {
-    const { msnv, hoat_dong, ten_hoi_nghi, don_vi_to_chuc, 
-            ngay, pham_vi, thoi_luong, gio_chuan_hoat_dong, gio_quy_doi } = req.body;
+    const { msnv, hoat_dong, ten_hoi_nghi, don_vi_to_chuc,
+        ngay, pham_vi, thoi_luong, gio_chuan_hoat_dong, gio_quy_doi } = req.body;
     try {
         const AddSciCfs = await pool.query(
             `INSERT INTO hoi_nghi_khoa_hoc (
@@ -441,7 +502,7 @@ app.post("/education/AddSciCfs", async (req, res) => {
                 $1, $2, $3, $4, $5, $6, $7, $8, $9
             ) RETURNING *`,
             [
-                msnv, hoat_dong, ten_hoi_nghi, don_vi_to_chuc, 
+                msnv, hoat_dong, ten_hoi_nghi, don_vi_to_chuc,
                 ngay, pham_vi, thoi_luong, gio_chuan_hoat_dong, gio_quy_doi
             ]
         );
@@ -481,8 +542,8 @@ app.get("/education/getAllSciPro", async (req, res) => {
 
 //thêm sản phẩm
 app.post("/education/AddSciResPro", async (req, res) => {
-    const { msnv, hoat_dong, ten_san_pham, don_vi_cap_chung_nhan, minh_chung, pham_vi, 
-            ngay, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi } = req.body;
+    const { msnv, hoat_dong, ten_san_pham, don_vi_cap_chung_nhan, minh_chung, pham_vi,
+        ngay, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi } = req.body;
     try {
         const addSciResPro = await pool.query(
             `INSERT INTO san_pham_khcn (
@@ -492,7 +553,7 @@ app.post("/education/AddSciResPro", async (req, res) => {
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
             ) RETURNING *`,
             [
-                msnv, hoat_dong, ten_san_pham, don_vi_cap_chung_nhan, minh_chung, pham_vi, 
+                msnv, hoat_dong, ten_san_pham, don_vi_cap_chung_nhan, minh_chung, pham_vi,
                 ngay, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi
             ]
         );
@@ -530,11 +591,32 @@ app.get("/education/getAllInit", async (req, res) => {
     }
 });
 // get all sáng kiến của user
-
+app.get("/education/getInitOfUser/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const init = await pool.query("SELECT * FROM sang_kien WHERE msnv = $1", [id]);
+        res.json(init.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+})
+// get thông tin sáng kiến
+app.get("/education/getDataInit/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const init = await pool.query("SELECT * FROM sang_kien WHERE ma_sang_kien = $1", [id]);
+        // res.json(doc.rows);
+        res.json(init.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+})
 //thêm sáng kiến
 app.post("/education/AddInit", async (req, res) => {
-    const { msnv, hoat_dong, ten_cong_trinh, ma_so_chung_nhan, ngay, loi_ich, 
-            so_tien_loi_ich, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi } = req.body;
+    const { msnv, hoat_dong, ten_cong_trinh, ma_so_chung_nhan, ngay, loi_ich,
+        so_tien_loi_ich, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi } = req.body;
     try {
         const addInit = await pool.query(
             `INSERT INTO sang_kien (
@@ -544,7 +626,7 @@ app.post("/education/AddInit", async (req, res) => {
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
             ) RETURNING *`,
             [
-                msnv, hoat_dong, ten_cong_trinh, ma_so_chung_nhan, ngay, loi_ich, 
+                msnv, hoat_dong, ten_cong_trinh, ma_so_chung_nhan, ngay, loi_ich,
                 so_tien_loi_ich, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi
             ]
         );
@@ -566,6 +648,16 @@ app.delete("/education/deleteInit/:id", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+// app.delete("/education/deleteDoc/:id", async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const deleteDoc = await pool.query("DELETE FROM tai_lieu WHERE ma_tai_lieu = $1", [id]);
+//         res.json("Delete success");
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ error: "Server error" });
+//     }
+// })
 
 
 
