@@ -637,6 +637,29 @@ app.post("/education/AddInit", async (req, res) => {
         res.status(500).json({ error: "Có lỗi xảy ra khi thêm sáng kiến" });
     }
 });
+// chỉnh sửa sáng kiến
+app.put("/education/editDataInit/:id", async (req, res) => {
+    const { id } = req.params;
+    const { hoat_dong, ten_cong_trinh, ma_so_chung_nhan, ngay, loi_ich, 
+            so_tien_loi_ich, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi } = req.body;
+    try {
+        const editDataInit = await pool.query(
+            `UPDATE sang_kien 
+             SET hoat_dong = $1, ten_cong_trinh = $2, ma_so_chung_nhan = $3, ngay = $4, loi_ich = $5, so_tien_loi_ich = $6, 
+                 gio_chuan_hoat_dong = $7, ty_le_dong_gop = $8, gio_quy_doi = $9
+             WHERE ma_sang_kien = $10
+             RETURNING *`,
+            [
+                hoat_dong, ten_cong_trinh, ma_so_chung_nhan, ngay, loi_ich, 
+                so_tien_loi_ich, gio_chuan_hoat_dong, ty_le_dong_gop, gio_quy_doi, id
+            ]
+        );
+        res.json("Update Initiative success");
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Server error" });
+    }
+})
 // xóa sáng kiến
 app.delete("/education/deleteInit/:id", async (req, res) => {
     try {
@@ -648,16 +671,6 @@ app.delete("/education/deleteInit/:id", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
-// app.delete("/education/deleteDoc/:id", async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const deleteDoc = await pool.query("DELETE FROM tai_lieu WHERE ma_tai_lieu = $1", [id]);
-//         res.json("Delete success");
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ error: "Server error" });
-//     }
-// })
 
 
 
