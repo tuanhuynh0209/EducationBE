@@ -158,8 +158,30 @@ app.get("/education/getAllSciArt", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
-// get bài báo khoa học của user
+// get data bài cáo khoa học của user
+app.get("/education/getDataArt/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const article = await pool.query(`SELECT * FROM bai_bao_khoa_hoc WHERE ma_bai_bao = ${id}`);
+        // res.json(doc.rows);
+        res.json(article.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+})
 
+// get list bài báo khoa học của user
+app.get("/education/getArtOfUser/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const article= await pool.query("SELECT * FROM bai_bao_khoa_hoc WHERE msnv = $1", [id]);
+        res.json(article.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+})
 //thêm bài báo KH
 app.post("/education/AddSciArt", async (req, res) => {
     const { msnv, hoat_dong, ten_bai_bao, doi, ngay, ten_tap_chi, ten_nha_xuat_ban, ngon_ngu, pham_vi_cap_do,
@@ -231,9 +253,53 @@ app.get("/education/getAllTopics", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 })
-// get đề tài nghiên cứu của user
-
-//thêm đề tài nghiên cứu
+// get nghiên cứu đề tài của user
+app.get("/education/getDataTpc/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const topic = await pool.query("SELECT * FROM nghien_cuu_de_tai WHERE ma_de_tai = $1", [id]);
+        // res.json(doc.rows);
+        res.json(topic.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+})
+// get list bài nghiên cứu đề tài của user
+app.get("/education/getTpcOfUser/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const topic = await pool.query("SELECT * FROM nghien_cuu_de_tai WHERE msnv = $1", [id]);
+        res.json(topic.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+})
+// chỉnh sửa nghiên cứu đề tài
+app.put("/education/editDataTpc/:id", async (req, res) => {
+    const { id } = req.params;
+    const { hoat_dong, pham_vi_cap_do, ten_de_tai, ma_so_hop_dong, ngay, gio_chuan_hoat_dong, vai_tro,
+            so_luong_thanh_vien_vai_tro, ty_le_dong_gop, gio_quy_doi } = req.body;
+    try {
+        const editDataTpc = await pool.query(
+            `UPDATE nghien_cuu_de_tai 
+             SET hoat_dong = $1, pham_vi_cap_do = $2, ten_de_tai = $3, ma_so_hop_dong = $4, ngay = $5, gio_chuan_hoat_dong = $6, 
+                 vai_tro = $7, so_luong_thanh_vien_vai_tro = $8, ty_le_dong_gop = $9, gio_quy_doi = $10
+             WHERE ma_de_tai = $11
+             RETURNING *`,
+            [
+                hoat_dong, pham_vi_cap_do, ten_de_tai, ma_so_hop_dong, ngay, gio_chuan_hoat_dong, vai_tro,
+                so_luong_thanh_vien_vai_tro, ty_le_dong_gop, gio_quy_doi, id
+            ]
+        );
+        res.json("Update Topic success");
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Server error" });
+    }
+})
+//thêm nghiên cứu đề tài
 app.post("/education/AddSciResTpt", async (req, res) => {
     const { msnv, hoat_dong, pham_vi_cap_do, ten_de_tai, ma_so_hop_dong, ngay, gio_chuan_hoat_dong, vai_tro,
         so_luong_thanh_vien_vai_tro, ty_le_dong_gop, gio_quy_doi } = req.body;
@@ -337,7 +403,7 @@ app.put("/education/editDataCou/:id", async (req, res) => {
 })
 //thêm hội đồng NCKH
 app.post("/education/AddSciResCou", async (req, res) => {
-    const { msnv, so_nghi_quyet, ngay, vai_tro, gio_quy_doi, ten_de_tai } = req.body;
+    const { msnv, so_quyet_dinh, ngay, vai_tro, gio_quy_doi, ten_de_tai } = req.body;
     try {
         const addSciResCou = await pool.query(
             `INSERT INTO hoi_dong (
@@ -346,7 +412,7 @@ app.post("/education/AddSciResCou", async (req, res) => {
                 $1, $2, $3, $4, $5, $6
             ) RETURNING *`,
             [
-                msnv, so_nghi_quyet, ngay, vai_tro, gio_quy_doi, ten_de_tai
+                msnv, so_quyet_dinh, ngay, vai_tro, gio_quy_doi, ten_de_tai
             ]
         );
         // Trả về phản hồi thành công
@@ -607,7 +673,7 @@ app.put("/education/editDataCfs/:id", async (req, res) => {
         ngay, pham_vi, thoi_luong, gio_chuan_hoat_dong, gio_quy_doi } = req.body;
     try {
         const editDataCfs = await pool.query(
-            `UPDATE tai_lieu 
+            `UPDATE hoi_nghi_khoa_hoc
              SET hoat_dong = $1, ten_hoi_nghi = $2, don_vi_to_chuc = $3, ngay = $4, 
              pham_vi = $5, thoi_luong = $6, gio_chuan_hoat_dong = $7, gio_quy_doi = $8
              WHERE ma_hoi_nghi = $9
