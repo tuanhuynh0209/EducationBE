@@ -1,11 +1,14 @@
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
+// const dotenv = require('dotenv');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const pool = require("./db");
 
 //middleware
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 
 
@@ -14,6 +17,131 @@ app.listen(3001, () => {
 });
 
 // DONE
+
+// Search
+// Tìm kiếm API
+app.get("/education/search", async (req, res) => {
+    const { keyword, type } = req.query; // keyword: mã số hoặc mã bảng, type: loại tìm kiếm (msnv hoặc ma)
+
+    try {
+        let result;
+
+        if (type === 'msnv') {
+            // Tìm kiếm theo mã số nhân viên
+            const userQuery = `SELECT * FROM users WHERE msnv = $1`;
+            const articlesQuery = `SELECT * FROM bai_bao_khoa_hoc WHERE msnv = $1`;
+            const documentsQuery = `SELECT * FROM tai_lieu WHERE msnv = $1`;
+            const topicsQuery = `SELECT * FROM nghien_cuu_de_tai WHERE msnv = $1`;
+            const initiativesQuery = `SELECT * FROM sang_kien WHERE msnv = $1`;
+            const productsQuery = `SELECT * FROM san_pham_khcn WHERE msnv = $1`;
+            const councilsQuery = `SELECT * FROM hoi_dong WHERE msnv = $1`;
+            const reportsQuery = `SELECT * FROM bao_cao_khoa_hoc WHERE msnv = $1`;
+            const conferencesQuery = `SELECT * FROM hoi_nghi_khoa_hoc WHERE msnv = $1`;
+
+            const userResult = await pool.query(userQuery, [keyword]);
+            const articlesResult = await pool.query(articlesQuery, [keyword]);
+            const documentsResult = await pool.query(documentsQuery, [keyword]);
+            const topicsResult = await pool.query(topicsQuery, [keyword]);
+            const initiativesResult = await pool.query(initiativesQuery, [keyword]);
+            const productsResult = await pool.query(productsQuery, [keyword]);
+            const councilsResult = await pool.query(councilsQuery, [keyword]);
+            const reportsResult = await pool.query(reportsQuery, [keyword]);
+            const conferencesResult = await pool.query(conferencesQuery, [keyword]);
+
+            result = {
+                user: userResult.rows,
+                articles: articlesResult.rows,
+                documents: documentsResult.rows,
+                topic: topicsResult.rows,
+                initiatives: initiativesResult.rows,
+                products: productsResult.rows,
+                councils: councilsResult.rows,
+                reports: reportsResult.rows,
+                conferences: conferencesResult.rows,
+            };
+        } else if (type === 'ma') {
+            const userQuery = `SELECT * FROM users WHERE msnv = $1`;
+            // Tìm kiếm theo mã bảng cụ thể
+            const articleQuery = `
+                SELECT bbk.*, u.ho_ten, u.don_vi
+                FROM bai_bao_khoa_hoc bbk
+                JOIN users u ON bbk.msnv = u.msnv
+                WHERE ma_bai_bao = $1
+            `;
+            const documentQuery = `
+                SELECT tl.*, u.ho_ten, u.don_vi
+                FROM tai_lieu tl
+                JOIN users u ON tl.msnv = u.msnv
+                WHERE ma_tai_lieu = $1
+            `;
+            const topicQuery = `
+                SELECT dt.*, u.ho_ten, u.don_vi
+                FROM nghien_cuu_de_tai dt
+                JOIN users u ON dt.msnv = u.msnv
+                WHERE ma_de_tai = $1
+            `;
+            const initiativeQuery = `
+                SELECT sk.*, u.ho_ten, u.don_vi
+                FROM sang_kien sk
+                JOIN users u ON sk.msnv = u.msnv
+                WHERE ma_sang_kien = $1
+            `;
+            const productQuery = `
+                SELECT sp.*, u.ho_ten, u.don_vi
+                FROM san_pham_khcn sp
+                JOIN users u ON sp.msnv = u.msnv
+                WHERE ma_san_pham = $1
+            `;
+            const councilQuery = `
+                SELECT hd.*, u.ho_ten, u.don_vi
+                FROM hoi_dong hd
+                JOIN users u ON hd.msnv = u.msnv
+                WHERE ma_hoi_dong = $1
+            `;
+            const reportQuery = `
+                SELECT bckh.*, u.ho_ten, u.don_vi
+                FROM bao_cao_khoa_hoc bckh
+                JOIN users u ON bckh.msnv = u.msnv
+                WHERE ma_bao_cao = $1
+            `;
+            const conferenceQuery = `
+                SELECT hn.*, u.ho_ten, u.don_vi
+                FROM hoi_nghi_khoa_hoc hn
+                JOIN users u ON hn.msnv = u.msnv
+                WHERE ma_hoi_nghi = $1
+            `;
+            const userResult = await pool.query(userQuery, [keyword]);
+            const articleResult = await pool.query(articleQuery, [keyword]);
+            const documentResult = await pool.query(documentQuery, [keyword]);
+            const topicResult = await pool.query(topicQuery, [keyword]);
+            const initiativeResult = await pool.query(initiativeQuery, [keyword]);
+            const productResult = await pool.query(productQuery, [keyword]);
+            const councilResult = await pool.query(councilQuery, [keyword]);
+            const reportResult = await pool.query(reportQuery, [keyword]);
+            const conferenceResult = await pool.query(conferenceQuery, [keyword]);
+
+            result = {
+                user: userResult.rows,
+                articles: articleResult.rows,
+                documents: documentResult.rows,
+                topic: topicResult.rows,
+                initiatives: initiativeResult.rows,
+                products: productResult.rows,
+                councils: councilResult.rows,
+                reports: reportResult.rows,
+                conferences: conferenceResult.rows,
+            };
+        } else {
+            return res.status(400).json({ error: 'Invalid search type' });
+        }
+
+        return res.json(result);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 // account
 //register
@@ -162,7 +290,7 @@ app.get("/education/getAllSciArt", async (req, res) => {
 app.get("/education/getDataArt/:id", async (req, res) => {
     const { id } = req.params;
     try {
-        const article = await pool.query(`SELECT * FROM bai_bao_khoa_hoc WHERE ma_bai_bao = ${id}`);
+        const article = await pool.query(`SELECT * FROM bai_bao_khoa_hoc WHERE ma_bai_bao = $1`, [id]);
         // res.json(doc.rows);
         res.json(article.rows[0]);
     } catch (err) {
@@ -175,7 +303,7 @@ app.get("/education/getDataArt/:id", async (req, res) => {
 app.get("/education/getArtOfUser/:id", async (req, res) => {
     const { id } = req.params;
     try {
-        const article= await pool.query("SELECT * FROM bai_bao_khoa_hoc WHERE msnv = $1", [id]);
+        const article = await pool.query("SELECT * FROM bai_bao_khoa_hoc WHERE msnv = $1", [id]);
         res.json(article.rows);
     } catch (err) {
         console.error(err);
@@ -206,24 +334,25 @@ app.post("/education/AddSciArt", async (req, res) => {
         res.status(500).json({ error: "Có lỗi xảy ra khi thêm bài báo" });
     }
 });
-// Chỉnh sửa bài báo khoa học
-app.put("/education/editSciArt/:id", async (req, res) => {
+
+// chỉnh sửa bài báo khoa học
+app.put("/education/editDataArt/:id", async (req, res) => {
     const { id } = req.params;
-    const { hoat_dong, ten_bai_bao, doi, ngay, ten_tap_chi, ten_nha_xuat_ban, ngon_ngu, pham_vi_cap_do,
-        impact_factor, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien, tong_so_tac_gia, ty_le_dong_gop, gio_quy_doi } = req.body;
+    const { hoat_dong, ten_bai_bao, doi, ngay, ten_tap_chi, ten_nha_xuat_ban, ngon_ngu,
+        pham_vi_cap_do, impact_factor, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien, tong_so_tac_gia, ty_le_dong_gop, gio_quy_doi } = req.body;
     try {
-        const editSciArt = await pool.query(
+        const editDataTpc = await pool.query(
             `UPDATE bai_bao_khoa_hoc 
              SET hoat_dong = $1, ten_bai_bao = $2, doi = $3, ngay = $4, ten_tap_chi = $5, ten_nha_xuat_ban = $6, 
-                 ngon_ngu = $7, pham_vi = $8, cap_do = $9, impact_factor = $10, gio_chuan_hoat_dong = $11, vai_tro = $12, tong_so_thanh_vien = $13, tong_so_tac_gia = $14, ty_le_dong_gop = $15, gio_quy_doi = $16
-             WHERE msnv = $17
+                 ngon_ngu = $7, pham_vi_cap_do = $8, impact_factor = $9, gio_chuan_hoat_dong = $10, vai_tro = $11, tong_so_thanh_vien = $12, tong_so_tac_gia = $13, ty_le_dong_gop = $14, gio_quy_doi = $15
+             WHERE ma_bai_bao = $16
              RETURNING *`,
             [
-                hoat_dong, ten_bai_bao, doi, ngay, ten_tap_chi, ten_nha_xuat_ban, ngon_ngu, pham_vi_cap_do,
-                impact_factor, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien, tong_so_tac_gia, ty_le_dong_gop, gio_quy_doi
+                hoat_dong, ten_bai_bao, doi, ngay, ten_tap_chi, ten_nha_xuat_ban, ngon_ngu,
+                pham_vi_cap_do, impact_factor, gio_chuan_hoat_dong, vai_tro, tong_so_thanh_vien, tong_so_tac_gia, ty_le_dong_gop, gio_quy_doi, id
             ]
         );
-        res.json("Update information success");
+        res.json("Update Bài báo success");
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ error: "Server error" });
@@ -280,7 +409,7 @@ app.get("/education/getTpcOfUser/:id", async (req, res) => {
 app.put("/education/editDataTpc/:id", async (req, res) => {
     const { id } = req.params;
     const { hoat_dong, pham_vi_cap_do, ten_de_tai, ma_so_hop_dong, ngay, gio_chuan_hoat_dong, vai_tro,
-            so_luong_thanh_vien_vai_tro, ty_le_dong_gop, gio_quy_doi } = req.body;
+        so_luong_thanh_vien_vai_tro, ty_le_dong_gop, gio_quy_doi } = req.body;
     try {
         const editDataTpc = await pool.query(
             `UPDATE nghien_cuu_de_tai 
@@ -514,7 +643,7 @@ app.post("/education/AddDoc", async (req, res) => {
         res.json(addDoc.rows[0]);
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ error: "Có lỗi xảy ra khi thêm bài báo" });
+        res.status(500).json({ error: "Có lỗi xảy ra khi thêm tài liệu" });
     }
 });
 // xóa tài liệu
@@ -930,22 +1059,3 @@ app.get("/education/getAllStatistics", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
