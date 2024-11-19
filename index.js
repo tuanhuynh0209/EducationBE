@@ -5,6 +5,10 @@ const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const pool = require("./db");
+// const jwt = require('jsonwebtoken');
+
+// const JWT_SECRET = 'secret_key'; // Đặt giá trị bí mật an toàn
+// const JWT_EXPIRES = '1h'; // Thời gian tồn tại của token
 
 //middleware
 app.use(cors());
@@ -17,6 +21,54 @@ app.listen(3001, () => {
 });
 
 // DONE
+
+
+// account
+//register
+app.post("/education/register", async (req, res) => {
+    const { msnv, ho_ten, mat_khau } = req.body;
+    try {
+        const existingUser = await pool.query('SELECT * FROM users WHERE msnv = $1', [msnv]);
+
+        if (existingUser.rows.length > 0) {
+            return res.status(400).json({ message: 'Người dùng đã tồn tại' });
+        }
+        const hashedPassword = await bcrypt.hash(mat_khau, 10);
+        const newUser = await pool.query(
+            `INSERT INTO users (msnv, ho_ten, mat_khau) 
+             VALUES ($1, $2, $3) RETURNING *`,
+            [msnv, ho_ten, hashedPassword]
+        );
+        res.status(201).json(newUser.rows[0]);
+        console.log(newUser.rows[0]);
+    } catch (error) {
+        console.error('Lỗi đăng ký không thành công:', error);
+        res.status(500).json({ message: 'Lỗi khi đăng ký người dùng' });
+    }
+});
+
+// login
+app.post('/education/login', async (req, res) => {
+    const { msnv, mat_khau } = req.body;
+    try {
+        const userResult = await pool.query('SELECT * FROM users WHERE msnv = $1', [msnv]);
+        if (userResult.rows.length === 0) {
+            return res.status(401).json({ message: 'Người dùng không tồn tại' });
+        }
+        const user = userResult.rows[0];
+        //ss pass
+        const isPasswordValid = await bcrypt.compare(mat_khau, user.mat_khau);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Mật khẩu không chính xác' });
+        }
+        const { mat_khau: _, ...userInfo } = user; // Loại bỏ mật khẩu
+        res.status(200).json(userInfo);
+        console.log(userResult.rows[0]);
+    } catch (error) {
+        console.error('Lỗi đăng nhập không thành công:', error); // Log lỗi
+        res.status(500).json({ message: 'Lỗi khi đăng nhập' });
+    }
+});
 
 // Search
 // Tìm kiếm API
@@ -143,52 +195,6 @@ app.get("/education/search", async (req, res) => {
 });
 
 
-// account
-//register
-app.post("/education/register", async (req, res) => {
-    const { msnv, ho_ten, mat_khau } = req.body;
-    try {
-        const existingUser = await pool.query('SELECT * FROM users WHERE msnv = $1', [msnv]);
-
-        if (existingUser.rows.length > 0) {
-            return res.status(400).json({ message: 'Người dùng đã tồn tại' });
-        }
-        const hashedPassword = await bcrypt.hash(mat_khau, 10);
-        const newUser = await pool.query(
-            `INSERT INTO users (msnv, ho_ten, mat_khau) 
-             VALUES ($1, $2, $3) RETURNING *`,
-            [msnv, ho_ten, hashedPassword]
-        );
-        res.status(201).json(newUser.rows[0]);
-        console.log(newUser.rows[0]);
-    } catch (error) {
-        console.error('Lỗi đăng ký không thành công:', error);
-        res.status(500).json({ message: 'Lỗi khi đăng ký người dùng' });
-    }
-});
-
-// login
-app.post('/education/login', async (req, res) => {
-    const { msnv, mat_khau } = req.body;
-    try {
-        const userResult = await pool.query('SELECT * FROM users WHERE msnv = $1', [msnv]);
-        if (userResult.rows.length === 0) {
-            return res.status(401).json({ message: 'Người dùng không tồn tại' });
-        }
-        const user = userResult.rows[0];
-        //ss pass
-        const isPasswordValid = await bcrypt.compare(mat_khau, user.mat_khau);
-        if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Mật khẩu không chính xác' });
-        }
-        const { mat_khau: _, ...userInfo } = user; // Loại bỏ mật khẩu
-        res.status(200).json(userInfo);
-        console.log(userResult.rows[0]);
-    } catch (error) {
-        console.error('Lỗi đăng nhập không thành công:', error); // Log lỗi
-        res.status(500).json({ message: 'Lỗi khi đăng nhập' });
-    }
-});
 
 // USER
 // Get all User
