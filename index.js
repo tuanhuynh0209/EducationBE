@@ -1052,8 +1052,6 @@ app.delete("/education/deleteInit/:id", async (req, res) => {
 });
 
 
-
-
 // THỐNG KÊ
 // get all record statistics
 app.get("/education/getAllStatistics", async (req, res) => {
